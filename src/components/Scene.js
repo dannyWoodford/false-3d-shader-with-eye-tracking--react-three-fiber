@@ -11,6 +11,10 @@ const m3scaling = (sx, sy) => {
 
 export default function Scene({ ...props }) {
 	const [canvasExist, setCanvasExist] = useState(false)
+	const [context, setContext] = useState({
+		x: -1,
+		y: -1
+	})
 	
 	/**
 	 * Sizes
@@ -91,20 +95,78 @@ export default function Scene({ ...props }) {
 	const bufferInfo = twgl.primitives.createXYQuadBufferInfo(gl)
 
 	const mouse = [0, 0]
-	document.addEventListener('mousemove', (event) => {
-		mouse[0] = ((event.clientX / sizes.width) * 2 - 1) * 0.01
-		mouse[1] = ((event.clientY / sizes.height) * 2 - 1) * 0.01
-	})
+	// document.addEventListener('mousemove', (event) => {
+	// 	mouse[0] = ((event.clientX / sizes.width) * 2 - 1) * 0.01
+	// 	mouse[1] = ((event.clientY / sizes.height) * 2 - 1) * 0.01
 
-	document.addEventListener('touchmove', (event) => {
-		mouse[0] = ((event.touches[0].clientX / sizes.width) * 2 - 1) * -0.02
-		mouse[1] = ((event.touches[0].clientY / sizes.height) * 2 - 1) * -0.02
-	})
+	// 	// console.log('event.clientX', event.clientX)
+	// })
 
-	document.addEventListener('touchend', (event) => {
-		mouse[0] = 0
-		mouse[1] = 0
-	})
+	// Select the node that will be observed for mutations
+	const targetNode = document.querySelector('body');
+
+	// Options for the observer (which mutations to observe)
+	const config = { attributes: true, childList: true, subtree: true };
+
+	// Callback function to execute when mutations are observed
+	const callback = function(mutationsList, observer) {
+		// Use traditional 'for loops' for IE 11
+		for(const mutation of mutationsList) {
+			if (mutation.type === 'childList') {
+				// console.log('A child node has been added or removed.');
+				if (mutation.addedNodes[0]) { 
+					if (mutation.addedNodes[0].id === 'webgazerGazeDot') { 
+						// console.log('', mutation.addedNodes[0].id);
+					}
+				}
+			}
+			else if (mutation.type === 'attributes') {
+				if (mutation.target.id === 'webgazerGazeDot') { 
+					// console.dir(mutation.target);
+					// console.log('The ' + mutation.attributeName + ' attribute was modified.');
+					let style = window.getComputedStyle(mutation.target);
+					let matrix = new DOMMatrix(style.transform);
+					// console.log('translateX: ', matrix.m41);
+					// console.log('translateY: ', matrix.m42);
+					mouse[0] = ((matrix.m41 / sizes.width) * 2 - 1) * 0.02
+					mouse[1] = ((matrix.m42 / sizes.height) * 2 - 1) * 0.02
+					
+					// if (matrix.m41 - context.x > 100) { 
+					// 	console.log('mouse[0]', mouse[0])
+					// 	setContext({
+					// 		x: matrix.m41,
+					// 		y: -1
+					// 	})
+					// } 
+				}
+			}
+		}
+	};
+
+	// Create an observer instance linked to the callback function
+	const observer = new MutationObserver(callback);
+
+	// Start observing the target node for configured mutations
+	observer.observe(targetNode, config);
+		
+	// useEffect(() => {
+	// 	let webgazerGazeDot = document.querySelector('#webgazerGazeDot')
+	// 	console.log('webgazerGazeDot', webgazerGazeDot)
+		
+	// 	if (webgazerGazeDot !== null) { 
+	// 		console.log('useEffect', webgazerGazeDot)
+	// 	}
+	// })
+
+	// document.addEventListener('touchmove', (event) => {
+	// 	mouse[0] = ((event.touches[0].clientX / sizes.width) * 2 - 1) * -0.02
+	// 	mouse[1] = ((event.touches[0].clientY / sizes.height) * 2 - 1) * -0.02
+	// })
+
+	// document.addEventListener('touchend', (event) => {
+	// 	mouse[0] = 0
+	// 	mouse[1] = 0
+	// })
 
 	let nMouse = [0, 0]
 

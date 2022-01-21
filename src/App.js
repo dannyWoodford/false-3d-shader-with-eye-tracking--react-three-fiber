@@ -10,17 +10,25 @@ declare var webgazer
 
 class WebGazeLoader extends React.Component {
 
+	constructor() {
+		super();
+		this.state = {
+		context: {x: -1, y: -1}
+		};
+	}
+
 	handleScriptLoad() {
 		webgazer.setGazeListener((data, elapsedTime) => {
 			if (data == null) {
 				return
 			}
 		
-			if (data.x - this.props.context.x > 50) { 
+			if (data.x - this.state.context.x > 50) { 
 				// console.log('data', data.x)
 				// console.log('this.props.context', this.props.context.x)
 
-				this.props.setContext(webgazer.util.bound(data))
+				// this.setContext(webgazer.util.bound(data))
+				this.setState({context: webgazer.util.bound(data)})
 			}
 		})
 		.begin()
@@ -31,7 +39,7 @@ class WebGazeLoader extends React.Component {
 	}
 
 	render() {
-		console.log('rerender')
+		// console.log('rerender')
 
 		return (
 			// <WebGazeContext.Provider >
@@ -56,10 +64,10 @@ class WebGazeLoader extends React.Component {
 WebGazeLoader.contextType = WebGazeContext
 
 function App() {
-	const [context, setContext] = useState({
-		x: -1,
-		y: -1 
-	})
+	// const [context, setContext] = useState({
+	// 	x: -1,
+	// 	y: -1 
+	// })
 
 	// useEffect(() => {
 	// 	console.log('context', context)
@@ -67,9 +75,12 @@ function App() {
 
 	return (
 		<div className='App'>
-			<WebGazeLoader setContext={setContext} context={context}/>
+			<WebGazeLoader
+				// setContext={setContext}
+				// context={context} 
+			/>
 			<CanvasContainer
-				context={context}
+				// context={context}
 				// value={this.state.context}
 				// isReady={this.state.canvasReady}
 				// isReadyHandler={this.isReadyHandler}
